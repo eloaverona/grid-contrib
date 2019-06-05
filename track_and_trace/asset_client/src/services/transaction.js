@@ -15,6 +15,9 @@ const createTransaction = (payloadInfo, signer, family) => {
         case 'tnt':
             family = addressing.tntFamily
             break
+        case 'schema':
+            family = addressing.gridFamily
+            break
         default:
             family = addressing.tntFamily
     }
