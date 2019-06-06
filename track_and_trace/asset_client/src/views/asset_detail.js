@@ -21,7 +21,7 @@ const moment = require('moment')
 const truncate = require('lodash/truncate')
 
 const {MultiSelect} = require('../components/forms')
-const payloads = require('../services/payloads')
+// const payloads = require('../services/payloads')
 const parsing = require('../services/parsing')
 const transactions = require('../services/transactions')
 const api = require('../services/api')
@@ -62,39 +62,39 @@ const TransferDropdown = {
     let role = vnode.attrs.role
     let publicKey = vnode.attrs.publicKey
     return [
-      m('.dropdown',
-        m('button.btn.btn-primary.btn-block.dropdown-toggle.text-left',
-          { 'data-toggle': 'dropdown' },
-          vnode.children),
-        m('.dropdown-menu',
-          vnode.attrs.agents.map(agent => {
-            let proposal = _getProposal(record, agent.key, role)
-            return [
-              m("a.dropdown-item[href='#']", {
-                onclick: (e) => {
-                  e.preventDefault()
-                  if (proposal && proposal.issuingAgent === publicKey) {
-                    _answerProposal(record, agent.key, ROLE_TO_ENUM[role],
-                                    payloads.answerProposal.enum.CANCEL)
-                      .then(onsuccess)
-                  } else {
-                    _submitProposal(record, ROLE_TO_ENUM[role], agent.key)
-                      .then(onsuccess)
-                  }
-                }
-              }, m('span.text-truncate',
-                   truncate(agent.name, { length: 32 }),
-                   (proposal ? ' \u2718' : '')))
-            ]
-          })))
+      // m('.dropdown',
+      //   m('button.btn.btn-primary.btn-block.dropdown-toggle.text-left',
+      //     { 'data-toggle': 'dropdown' },
+      //     vnode.children),
+      //   m('.dropdown-menu',
+      //     vnode.attrs.agents.map(agent => {
+      //       let proposal = _getProposal(record, agent.key, role)
+      //       return [
+      //         m("a.dropdown-item[href='#']", {
+      //           onclick: (e) => {
+      //             e.preventDefault()
+      //             if (proposal && proposal.issuingAgent === publicKey) {
+      //               _answerProposal(record, agent.key, ROLE_TO_ENUM[role],
+      //                               payloads.answerProposal.enum.CANCEL)
+      //                 .then(onsuccess)
+      //             } else {
+      //               _submitProposal(record, ROLE_TO_ENUM[role], agent.key)
+      //                 .then(onsuccess)
+      //             }
+      //           }
+      //         }, m('span.text-truncate',
+      //              truncate(agent.name, { length: 32 }),
+      //              (proposal ? ' \u2718' : '')))
+      //       ]
+      //     })))
     ]
   }
 }
 
 const ROLE_TO_ENUM = {
-  'owner': payloads.createProposal.enum.OWNER,
-  'custodian': payloads.createProposal.enum.CUSTODIAN,
-  'reporter': payloads.createProposal.enum.REPORTER
+  // 'owner': payloads.createProposal.enum.OWNER,
+  // 'custodian': payloads.createProposal.enum.CUSTODIAN,
+  // 'reporter': payloads.createProposal.enum.REPORTER
 }
 
 const TransferControl = {
@@ -117,26 +117,26 @@ const TransferControl = {
       ]
     } else if (_hasProposal(record, publicKey, role)) {
       return [
-        m('.d-flex.justify-content-start',
-          m('button.btn.btn-primary', {
-            onclick: (e) => {
-              e.preventDefault()
-              _answerProposal(record, publicKey, ROLE_TO_ENUM[role],
-                              payloads.answerProposal.enum.ACCEPT)
+        // m('.d-flex.justify-content-start',
+        //   m('button.btn.btn-primary', {
+        //     onclick: (e) => {
+        //       e.preventDefault()
+        //       _answerProposal(record, publicKey, ROLE_TO_ENUM[role],
+        //                       payloads.answerProposal.enum.ACCEPT)
 
-                .then(onsuccess)
-            }
-          },
-          `Accept ${label}`),
-          m('button.btn.btn-danger.ml-auto', {
-            onclick: (e) => {
-              e.preventDefault()
-              _answerProposal(record, publicKey, ROLE_TO_ENUM[role],
-                              payloads.answerProposal.enum.REJECT)
-                .then(onsuccess)
-            }
-          },
-          `Reject`))
+        //         .then(onsuccess)
+        //     }
+        //   },
+        //   `Accept ${label}`),
+        //   m('button.btn.btn-danger.ml-auto', {
+        //     onclick: (e) => {
+        //       e.preventDefault()
+        //       _answerProposal(record, publicKey, ROLE_TO_ENUM[role],
+        //                       payloads.answerProposal.enum.REJECT)
+        //         .then(onsuccess)
+        //     }
+        //   },
+        //   `Reject`))
       ]
     } else {
       return null
@@ -161,70 +161,70 @@ const ReporterControl = {
     let onsuccess = vnode.attrs.onsuccess || (() => null)
     if (record.owner === publicKey) {
       return [
-        m(AuthorizeReporter, {
-          record,
-          agents,
-          onsubmit: ([publicKey, properties]) =>
-          _authorizeReporter(record, publicKey, properties).then(onsuccess)
-        }),
+        // m(AuthorizeReporter, {
+        //   record,
+        //   agents,
+        //   onsubmit: ([publicKey, properties]) =>
+        //   _authorizeReporter(record, publicKey, properties).then(onsuccess)
+        // }),
 
-        // Outstanding reporters
-        Object.entries(_reporters(record))
-        .filter(([key, _]) => key !== publicKey)
-        .map(([key, properties]) => {
-          return [
-            m('.mt-2.d-flex.justify-content-start',
-              `${_agentByKey(agents, key).name} authorized for ${properties}`,
-              m('.button.btn.btn-outline-danger.ml-auto', {
-                onclick: (e) => {
-                  e.preventDefault()
-                  _revokeAuthorization(record, key, properties)
-                    .then(onsuccess)
-                }
-              },
-              'Revoke Authorization'))
-          ]
-        }),
+        // // Outstanding reporters
+        // Object.entries(_reporters(record))
+        // .filter(([key, _]) => key !== publicKey)
+        // .map(([key, properties]) => {
+        //   return [
+        //     m('.mt-2.d-flex.justify-content-start',
+        //       `${_agentByKey(agents, key).name} authorized for ${properties}`,
+        //       m('.button.btn.btn-outline-danger.ml-auto', {
+        //         onclick: (e) => {
+        //           e.preventDefault()
+        //           _revokeAuthorization(record, key, properties)
+        //             .then(onsuccess)
+        //         }
+        //       },
+        //       'Revoke Authorization'))
+        //   ]
+        // }),
 
-        // Pending authorizations
-        record.proposals.filter((p) => p.role === 'REPORTER' && p.issuingAgent === publicKey).map(
-          (p) =>
-            m('.mt-2.d-flex.justify-content-start',
-              `Pending proposal for ${_agentByKey(agents, p.receivingAgent).name} on ${p.properties}`,
-              m('.button.btn.btn-outline-danger.ml-auto',
-                {
-                  onclick: (e) => {
-                    e.preventDefault()
-                    _answerProposal(record, p.receivingAgent, ROLE_TO_ENUM['reporter'],
-                                    payloads.answerProposal.enum.CANCEL)
-                      .then(onsuccess)
-                  }
-                },
-                'Rescind Proposal')))
+        // // Pending authorizations
+        // record.proposals.filter((p) => p.role === 'REPORTER' && p.issuingAgent === publicKey).map(
+        //   (p) =>
+        //     m('.mt-2.d-flex.justify-content-start',
+        //       `Pending proposal for ${_agentByKey(agents, p.receivingAgent).name} on ${p.properties}`,
+        //       m('.button.btn.btn-outline-danger.ml-auto',
+        //         {
+        //           onclick: (e) => {
+        //             e.preventDefault()
+        //             _answerProposal(record, p.receivingAgent, ROLE_TO_ENUM['reporter'],
+        //                             payloads.answerProposal.enum.CANCEL)
+        //               .then(onsuccess)
+        //           }
+        //         },
+        //         'Rescind Proposal')))
 
       ]
     } else if (_hasProposal(record, publicKey, 'reporter')) {
       let proposal = _getProposal(record, publicKey, 'reporter')
       return [
-        m('.d-flex.justify-content-start',
-          m('button.btn.btn-primary', {
-            onclick: (e) => {
-              e.preventDefault()
-              _answerProposal(record, publicKey, ROLE_TO_ENUM['reporter'],
-                              payloads.answerProposal.enum.ACCEPT)
-                .then(onsuccess)
-            }
-          },
-          `Accept Reporting Authorization for ${proposal.properties}`),
-          m('button.btn.btn-danger.ml-auto', {
-            onclick: (e) => {
-              e.preventDefault()
-              _answerProposal(record, publicKey, ROLE_TO_ENUM['reporter'],
-                              payloads.answerProposal.enum.REJECT)
-                .then(onsuccess)
-            }
-          },
-          `Reject`))
+        // m('.d-flex.justify-content-start',
+        //   m('button.btn.btn-primary', {
+        //     onclick: (e) => {
+        //       e.preventDefault()
+        //       _answerProposal(record, publicKey, ROLE_TO_ENUM['reporter'],
+        //                       payloads.answerProposal.enum.ACCEPT)
+        //         .then(onsuccess)
+        //     }
+        //   },
+        //   `Accept Reporting Authorization for ${proposal.properties}`),
+        //   m('button.btn.btn-danger.ml-auto', {
+        //     onclick: (e) => {
+        //       e.preventDefault()
+        //       _answerProposal(record, publicKey, ROLE_TO_ENUM['reporter'],
+        //                       payloads.answerProposal.enum.REJECT)
+        //         .then(onsuccess)
+        //     }
+        //   },
+        //   `Reject`))
       ]
     } else {
       return null
@@ -262,55 +262,55 @@ const ReportLocation = {
   view: (vnode) => {
     let onsuccess = vnode.attrs.onsuccess || (() => null)
     return [
-      m('form', {
-        onsubmit: (e) => {
-          e.preventDefault()
-          _updateProperty(vnode.attrs.record, {
-            name: 'location',
-            locationValue: {
-              latitude: parsing.toInt(vnode.state.latitude),
-              longitude: parsing.toInt(vnode.state.longitude)
-            },
-            dataType: payloads.updateProperties.enum.LOCATION
-          }).then(() => {
-            vnode.state.latitude = ''
-            vnode.state.longitude = ''
-          })
-          .then(onsuccess)
-        }
-      },
-      m('.form-row',
-        m('.form-group.col-5',
-          m('label.sr-only', { 'for': 'latitude' }, 'Latitude'),
-          m("input.form-control[type='text']", {
-            name: 'latitude',
-            type: 'number',
-            step: 'any',
-            min: -90,
-            max: 90,
-            onchange: m.withAttr('value', (value) => {
-              vnode.state.latitude = value
-            }),
-            value: vnode.state.latitude,
-            placeholder: 'Latitude'
-          })),
-        m('.form-group.col-5',
-          m('label.sr-only', { 'for': 'longitude' }, 'Longitude'),
-          m("input.form-control[type='text']", {
-            name: 'longitude',
-            type: 'number',
-            step: 'any',
-            min: -180,
-            max: 180,
-            onchange: m.withAttr('value', (value) => {
-              vnode.state.longitude = value
-            }),
-            value: vnode.state.longitude,
-            placeholder: 'Longitude'
-          })),
+      // m('form', {
+      //   onsubmit: (e) => {
+      //     e.preventDefault()
+      //     _updateProperty(vnode.attrs.record, {
+      //       name: 'location',
+      //       locationValue: {
+      //         latitude: parsing.toInt(vnode.state.latitude),
+      //         longitude: parsing.toInt(vnode.state.longitude)
+      //       },
+      //       dataType: payloads.updateProperties.enum.LOCATION
+      //     }).then(() => {
+      //       vnode.state.latitude = ''
+      //       vnode.state.longitude = ''
+      //     })
+      //     .then(onsuccess)
+      //   }
+      // },
+      // m('.form-row',
+      //   m('.form-group.col-5',
+      //     m('label.sr-only', { 'for': 'latitude' }, 'Latitude'),
+      //     m("input.form-control[type='text']", {
+      //       name: 'latitude',
+      //       type: 'number',
+      //       step: 'any',
+      //       min: -90,
+      //       max: 90,
+      //       onchange: m.withAttr('value', (value) => {
+      //         vnode.state.latitude = value
+      //       }),
+      //       value: vnode.state.latitude,
+      //       placeholder: 'Latitude'
+      //     })),
+      //   m('.form-group.col-5',
+      //     m('label.sr-only', { 'for': 'longitude' }, 'Longitude'),
+      //     m("input.form-control[type='text']", {
+      //       name: 'longitude',
+      //       type: 'number',
+      //       step: 'any',
+      //       min: -180,
+      //       max: 180,
+      //       onchange: m.withAttr('value', (value) => {
+      //         vnode.state.longitude = value
+      //       }),
+      //       value: vnode.state.longitude,
+      //       placeholder: 'Longitude'
+      //     })),
 
-        m('.col-2',
-          m('button.btn.btn-primary', 'Update'))))
+      //   m('.col-2',
+      //     m('button.btn.btn-primary', 'Update'))))
     ]
   }
 }
@@ -460,22 +460,22 @@ const AssetDetail = {
           _labelProperty('Type', getPropertyValue(record, 'type')),
           _labelProperty('Subtype', getPropertyValue(record, 'subtype'))),
 
-        _row(
-          _labelProperty(
-            'Weight',
-            _propLink(record, 'weight', _formatValue(record, 'weight'))),
-          (isReporter(record, 'weight', publicKey) && !record.final
-          ? m(ReportValue,
-            {
-              name: 'weight',
-              label: 'Weight (kg)',
-              record,
-              typeField: 'numberValue',
-              type: payloads.updateProperties.enum.NUMBER,
-              xform: (x) => parsing.toInt(x),
-              onsuccess: () => _loadData(vnode.attrs.recordId, vnode.state)
-            })
-           : null)),
+        // _row(
+        //   _labelProperty(
+        //     'Weight',
+        //     _propLink(record, 'weight', _formatValue(record, 'weight'))),
+        //   (isReporter(record, 'weight', publicKey) && !record.final
+        //   ? m(ReportValue,
+        //     {
+        //       name: 'weight',
+        //       label: 'Weight (kg)',
+        //       record,
+        //       typeField: 'numberValue',
+        //       type: payloads.updateProperties.enum.NUMBER,
+        //       xform: (x) => parsing.toInt(x),
+        //       onsuccess: () => _loadData(vnode.attrs.recordId, vnode.state)
+        //     })
+        //    : null)),
 
         _row(
           _labelProperty(
@@ -486,39 +486,39 @@ const AssetDetail = {
            ? m(ReportLocation, { record, onsuccess: () => _loadData(record.recordId, vnode.state) })
            : null)),
 
-        _row(
-          _labelProperty(
-            'Temperature',
-            _propLink(record, 'temperature', _formatTemp(getPropertyValue(record, 'temperature')))),
-          (isReporter(record, 'temperature', publicKey) && !record.final
-          ? m(ReportValue,
-            {
-              name: 'temperature',
-              label: 'Temperature (°C)',
-              record,
-              typeField: 'numberValue',
-              type: payloads.updateProperties.enum.NUMBER,
-              xform: (x) => parsing.toInt(x),
-              onsuccess: () => _loadData(vnode.attrs.recordId, vnode.state)
-            })
-           : null)),
+        // _row(
+        //   _labelProperty(
+        //     'Temperature',
+        //     _propLink(record, 'temperature', _formatTemp(getPropertyValue(record, 'temperature')))),
+        //   (isReporter(record, 'temperature', publicKey) && !record.final
+        //   ? m(ReportValue,
+        //     {
+        //       name: 'temperature',
+        //       label: 'Temperature (°C)',
+        //       record,
+        //       typeField: 'numberValue',
+        //       type: payloads.updateProperties.enum.NUMBER,
+        //       xform: (x) => parsing.toInt(x),
+        //       onsuccess: () => _loadData(vnode.attrs.recordId, vnode.state)
+        //     })
+        //    : null)),
 
-        _row(
-          _labelProperty(
-            'Shock',
-            _propLink(record, 'shock', _formatValue(record, 'shock'))),
-          (isReporter(record, 'shock', publicKey) && !record.final
-          ? m(ReportValue,
-            {
-              name: 'shock',
-              label: 'Shock (g)',
-              record,
-              typeField: 'numberValue',
-              type: payloads.updateProperties.enum.NUMBER,
-              xform: (x) => parsing.toInt(x),
-              onsuccess: () => _loadData(vnode.attrs.recordId, vnode.state)
-            })
-           : null)),
+        // _row(
+        //   _labelProperty(
+        //     'Shock',
+        //     _propLink(record, 'shock', _formatValue(record, 'shock'))),
+        //   (isReporter(record, 'shock', publicKey) && !record.final
+        //   ? m(ReportValue,
+        //     {
+        //       name: 'shock',
+        //       label: 'Shock (g)',
+        //       record,
+        //       typeField: 'numberValue',
+        //       type: payloads.updateProperties.enum.NUMBER,
+        //       xform: (x) => parsing.toInt(x),
+        //       onsuccess: () => _loadData(vnode.attrs.recordId, vnode.state)
+        //     })
+        //    : null)),
 
         _row(m(ReporterControl, {
           record,
@@ -593,75 +593,75 @@ const _loadData = (recordId, state) => {
   })
 }
 
-const _submitProposal = (record, role, publicKey) => {
-  let transferPayload = payloads.createProposal({
-    recordId: record.recordId,
-    receivingAgent: publicKey,
-    role: role
-  })
+// const _submitProposal = (record, role, publicKey) => {
+//   let transferPayload = payloads.createProposal({
+//     recordId: record.recordId,
+//     receivingAgent: publicKey,
+//     role: role
+//   })
 
-  return transactions.submit([transferPayload], true).then(() => {
-    console.log('Successfully submitted proposal')
-  })
-}
+//   return transactions.submit([transferPayload], true).then(() => {
+//     console.log('Successfully submitted proposal')
+//   })
+// }
 
-const _answerProposal = (record, publicKey, role, response) => {
-  let answerPayload = payloads.answerProposal({
-    recordId: record.recordId,
-    receivingAgent: publicKey,
-    role,
-    response
-  })
+// const _answerProposal = (record, publicKey, role, response) => {
+//   let answerPayload = payloads.answerProposal({
+//     recordId: record.recordId,
+//     receivingAgent: publicKey,
+//     role,
+//     response
+//   })
 
-  return transactions.submit([answerPayload], true).then(() => {
-    console.log('Successfully submitted answer')
-  })
-}
+//   return transactions.submit([answerPayload], true).then(() => {
+//     console.log('Successfully submitted answer')
+//   })
+// }
 
-const _updateProperty = (record, value) => {
-  let updatePayload = payloads.updateProperties({
-    recordId: record.recordId,
-    properties: [value]
-  })
+// const _updateProperty = (record, value) => {
+//   let updatePayload = payloads.updateProperties({
+//     recordId: record.recordId,
+//     properties: [value]
+//   })
 
-  return transactions.submit([updatePayload], true).then(() => {
-    console.log('Successfully submitted property update')
-  })
-}
+//   return transactions.submit([updatePayload], true).then(() => {
+//     console.log('Successfully submitted property update')
+//   })
+// }
 
-const _finalizeRecord = (record) => {
-  let finalizePayload = payloads.finalizeRecord({
-    recordId: record.recordId
-  })
+// const _finalizeRecord = (record) => {
+//   let finalizePayload = payloads.finalizeRecord({
+//     recordId: record.recordId
+//   })
 
-  return transactions.submit([finalizePayload], true).then(() => {
-    console.log('finalized')
-  })
-}
+//   return transactions.submit([finalizePayload], true).then(() => {
+//     console.log('finalized')
+//   })
+// }
 
-const _authorizeReporter = (record, reporterKey, properties) => {
-  let authroizePayload = payloads.createProposal({
-    recordId: record.recordId,
-    receivingAgent: reporterKey,
-    role: payloads.createProposal.enum.REPORTER,
-    properties: properties
-  })
+// const _authorizeReporter = (record, reporterKey, properties) => {
+//   let authroizePayload = payloads.createProposal({
+//     recordId: record.recordId,
+//     receivingAgent: reporterKey,
+//     role: payloads.createProposal.enum.REPORTER,
+//     properties: properties
+//   })
 
-  return transactions.submit([authroizePayload], true).then(() => {
-    console.log('Successfully submitted proposal')
-  })
-}
+//   return transactions.submit([authroizePayload], true).then(() => {
+//     console.log('Successfully submitted proposal')
+//   })
+// }
 
-const _revokeAuthorization = (record, reporterKey, properties) => {
-  let revokePayload = payloads.revokeReporter({
-    recordId: record.recordId,
-    reporterId: reporterKey,
-    properties
-  })
+// const _revokeAuthorization = (record, reporterKey, properties) => {
+//   let revokePayload = payloads.revokeReporter({
+//     recordId: record.recordId,
+//     reporterId: reporterKey,
+//     properties
+//   })
 
-  return transactions.submit([revokePayload], true).then(() => {
-    console.log('Successfully revoked reporter')
-  })
-}
+//   return transactions.submit([revokePayload], true).then(() => {
+//     console.log('Successfully revoked reporter')
+//   })
+// }
 
 module.exports = AssetDetail

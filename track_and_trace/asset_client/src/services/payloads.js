@@ -14,141 +14,140 @@
  * limitations under the License.
  * ----------------------------------------------------------------------------
  */
-'use strict'
+// 'use strict'
 
-const _ = require('lodash')
-const protobuf = require('protobufjs')
+// const _ = require('lodash')
+// const protobuf = require('protobufjs')
 
-// Use the generated JSON to reference the .proto files in protos/
-const protoJson = require('../generated_protos.json')
+// // Use the generated JSON to reference the .proto files in protos/
+// const protoJson = require('../generated_protos.json')
 
-// Keys for payload actions
-const SC_ACTIONS = [
-  'CREATE_RECORD',
-  'FINALIZE_RECORD',
-  'CREATE_RECORD_TYPE',
-  'UPDATE_PROPERTIES',
-  'CREATE_PROPOSAL',
-  'ANSWER_PROPOSAL',
-  'REVOKE_REPORTER'
-]
+// // Keys for payload actions
+// const SC_ACTIONS = [
+//   'CREATE_RECORD',
+//   'FINALIZE_RECORD',
+//   'CREATE_RECORD_TYPE',
+//   'UPDATE_PROPERTIES',
+//   'CREATE_PROPOSAL',
+//   'ANSWER_PROPOSAL',
+//   'REVOKE_REPORTER'
+// ]
 
-const PIKE_ACTIONS = [
-  'CREATE_AGENT'
-]
+// const PIKE_ACTIONS = [
+//   'CREATE_AGENT'
+// ]
 
-// Create dictionary with key, enum and class names
-const titleify = allCaps => {
-  return allCaps
-    .split('_')
-    .map(word => word[0] + word.slice(1).toLowerCase())
-    .join('')
-}
+// // Create dictionary with key, enum and class names
+// const titleify = allCaps => {
+//   return allCaps
+//     .split('_')
+//     .map(word => word[0] + word.slice(1).toLowerCase())
+//     .join('')
+// }
 
-const scActionMap = SC_ACTIONS.reduce((map, enumName) => {
-  const key = enumName[0].toLowerCase() + titleify(enumName).slice(1)
-  const className = titleify(enumName) + 'Action'
-  return _.set(map, key, { enum: enumName, name: className })
-}, {})
+// const scActionMap = SC_ACTIONS.reduce((map, enumName) => {
+//   const key = enumName[0].toLowerCase() + titleify(enumName).slice(1)
+//   const className = titleify(enumName) + 'Action'
+//   return _.set(map, key, { enum: enumName, name: className })
+// }, {})
 
-const pikeActionMap = PIKE_ACTIONS.reduce((map, enumName) => {
-  const key = enumName[0].toLowerCase() + titleify(enumName).slice(1)
-  const className = titleify(enumName) + 'Action'
-  return _.set(map, key, {enum: enumName, name: className })
-}, {})
+// const pikeActionMap = PIKE_ACTIONS.reduce((map, enumName) => {
+//   const key = enumName[0].toLowerCase() + titleify(enumName).slice(1)
+//   const className = titleify(enumName) + 'Action'
+//   return _.set(map, key, {enum: enumName, name: className })
+// }, {})
 
-// Compile Protobufs
-const root = protobuf.Root.fromJSON(protoJson)
-const SCPayload = root.lookup('SCPayload')
-const PikePayload = root.lookup('PikePayload')
-const PropertyValue = root.lookup('TrackAndTracePropertyValue')
-const PropertySchema = root.lookup('PropertySchema')
-const Location = root.lookup('Location')
-const Proposal = root.lookup('Proposal')
+// // Compile Protobufs
+// const root = protobuf.Root.fromJSON(protoJson)
+// const SCPayload = root.lookup('SCPayload')
+// const PikePayload = root.lookup('PikePayload')
+// const PropertyValue = root.lookup('TrackAndTracePropertyValue')
+// const PropertySchema = root.lookup('PropertySchema')
+// const Location = root.lookup('Location')
+// const Proposal = root.lookup('Proposal')
 
-_.map(scActionMap, action => {
-  return _.set(action, 'proto', root.lookup(action.name))
-})
+// _.map(scActionMap, action => {
+//   return _.set(action, 'proto', root.lookup(action.name))
+// })
 
-_.map(pikeActionMap, action => {
-  return _.set(action, 'proto', root.lookup(action.name))
-})
+// _.map(pikeActionMap, action => {
+//   return _.set(action, 'proto', root.lookup(action.name))
+// })
 
-// Create data xforms on an action by action basis
-const propertiesXformer = xform => data => {
-  return _.set(data, 'properties', data.properties.map(xform))
-}
-const valueXform = propertiesXformer(prop => PropertyValue.create(prop))
-const schemaXform = propertiesXformer(prop => {
-  if (prop.locationValue) {
-    prop.locationValue = Location.create(prop.locationValue)
-  }
-  return PropertySchema.create(prop)
-})
+// // Create data xforms on an action by action basis
+// const propertiesXformer = xform => data => {
+//   return _.set(data, 'properties', data.properties.map(xform))
+// }
+// const valueXform = propertiesXformer(prop => PropertyValue.create(prop))
+// const schemaXform = propertiesXformer(prop => {
+//   if (prop.locationValue) {
+//     prop.locationValue = Location.create(prop.locationValue)
+//   }
+//   return PropertySchema.create(prop)
+// })
 
-_.map(scActionMap, action => _.set(action, 'xform', x => x))
-scActionMap.createRecord.xform = valueXform
-scActionMap.createRecordType.xform = schemaXform
-scActionMap.updateProperties.xform = valueXform
+// _.map(scActionMap, action => _.set(action, 'xform', x => x))
+// scActionMap.createRecord.xform = valueXform
+// scActionMap.createRecordType.xform = schemaXform
+// scActionMap.updateProperties.xform = valueXform
 
-_.map(pikeActionMap, action => _.set(action, 'xform', x => x))
+// _.map(pikeActionMap, action => _.set(action, 'xform', x => x))
 
-/**
- * Encodes a new SCPayload with the specified action
- */
-const encode = (actionKey, actionData) => {
-  let action, actionFamily
-  if (_.has(scActionMap, actionKey)) {
-    action = scActionMap[actionKey]
-    actionFamily = 'SC'
-  } else if (_.has(pikeActionMap, actionKey)) {
-    action = pikeActionMap[actionKey]
-    actionFamily = 'Pike'
-  }
-  if (!action) {
-    throw new Error('There is no payload action with that key')
-  }
+// /**
+//  * Encodes a new SCPayload with the specified action
+//  */
+// const encode = (actionKey, actionData) => {
+//   let action, actionFamily
+//   if (_.has(scActionMap, actionKey)) {
+//     action = scActionMap[actionKey]
+//     actionFamily = 'SC'
+//   } else if (_.has(pikeActionMap, actionKey)) {
+//     action = pikeActionMap[actionKey]
+//     actionFamily = 'Pike'
+//   }
+//   if (!action) {
+//     throw new Error('There is no payload action with that key')
+//   }
 
-  let payload
+//   let payload
 
-  switch (actionFamily) {
-    case 'SC':
-      payload = SCPayload.encode({
-        action: SCPayload.Action[action.enum],
-        timestamp: Math.floor(Date.now() / 1000),
-        [actionKey]: action.proto.create(action.xform(actionData))
-      }).finish()
-    case 'Pike':
-      payload = PikePayload.encode({
-        action: PikePayload.Action[action.enum],
-        timestamp: Math.floor(Date.now() / 1000),
-        [actionKey]: action.proto.create(action.xform(actionData))
-      }).finish()
-  }
+//   switch (actionFamily) {
+//     case 'SC':
+//       payload = SCPayload.encode({
+//         action: SCPayload.Action[action.enum],
+//         timestamp: Math.floor(Date.now() / 1000),
+//         [actionKey]: action.proto.create(action.xform(actionData))
+//       }).finish()
+//     case 'Pike':
+//       payload = PikePayload.encode({
+//         action: PikePayload.Action[action.enum],
+//         timestamp: Math.floor(Date.now() / 1000),
+//         [actionKey]: action.proto.create(action.xform(actionData))
+//       }).finish()
+//   }
   
-  return payload
-}
+//   return payload
+// }
 
-/**
- * Particular encode methods can be called directly with their key name
- * For example: payloads.createAgent({name: 'Susan'})
- */
-const pikeActionMethods = _.reduce(pikeActionMap, (methods, value, key) => {
-  return _.set(methods, key, _.partial(encode, key))
-}, {})
+// /**
+//  * Particular encode methods can be called directly with their key name
+//  * For example: payloads.createAgent({name: 'Susan'})
+//  */
+// const pikeActionMethods = _.reduce(pikeActionMap, (methods, value, key) => {
+//   return _.set(methods, key, _.partial(encode, key))
+// }, {})
 
-const scActionMethods = _.reduce(scActionMap, (methods, value, key) => {
-  return _.set(methods, key, _.partial(encode, key))
-}, {})
+// const scActionMethods = _.reduce(scActionMap, (methods, value, key) => {
+//   return _.set(methods, key, _.partial(encode, key))
+// }, {})
 
-// Add enums on an action by action basis
-scActionMethods.createRecord.enum = PropertySchema.DataType
-scActionMethods.createRecordType.enum = PropertySchema.DataType
-scActionMethods.updateProperties.enum = PropertySchema.DataType
-scActionMethods.createProposal.enum = Proposal.Role
-scActionMethods.answerProposal.enum = scActionMap.answerProposal.proto.Response
+// // Add enums on an action by action basis
+// scActionMethods.createRecord.enum = PropertySchema.DataType
+// scActionMethods.createRecordType.enum = PropertySchema.DataType
+// scActionMethods.updateProperties.enum = PropertySchema.DataType
+// scActionMethods.createProposal.enum = Proposal.Role
+// scActionMethods.answerProposal.enum = scActionMap.answerProposal.proto.Response
 
-module.exports = _.assign({
-  encode,
+module.exports = {
   FLOAT_PRECISION: 1000000
-}, scActionMethods, pikeActionMethods)
+}

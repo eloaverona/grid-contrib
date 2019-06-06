@@ -18,7 +18,7 @@
 const m = require('mithril')
 
 const api = require('../services/api')
-const payloads = require('../services/payloads')
+// const payloads = require('../services/payloads')
 const transactions = require('../services/transactions')
 const parsing = require('../services/parsing')
 const forms = require('../components/forms')
@@ -158,57 +158,57 @@ const _updateReporters = (vnode, reporterIndex) => {
  *
  * Extract the appropriate values to pass to the create record transaction.
  */
-const _handleSubmit = (signingKey, state) => {
-  const properties = [{
-    name: 'type',
-    stringValue: state.type,
-    dataType: payloads.createRecord.enum.STRING
-  }]
+// const _handleSubmit = (signingKey, state) => {
+//   const properties = [{
+//     name: 'type',
+//     stringValue: state.type,
+//     dataType: payloads.createRecord.enum.STRING
+//   }]
 
-  if (state.subtype) {
-    properties.push({
-      name: 'subtype',
-      stringValue: state.subtype,
-      dataType: payloads.createRecord.enum.STRING
-    })
-  }
+//   if (state.subtype) {
+//     properties.push({
+//       name: 'subtype',
+//       stringValue: state.subtype,
+//       dataType: payloads.createRecord.enum.STRING
+//     })
+//   }
 
-  if (state.weight) {
-    properties.push({
-      name: 'weight',
-      numberValue: parsing.toInt(state.weight),
-      dataType: payloads.createRecord.enum.NUMBER
-    })
-  }
+//   if (state.weight) {
+//     properties.push({
+//       name: 'weight',
+//       numberValue: parsing.toInt(state.weight),
+//       dataType: payloads.createRecord.enum.NUMBER
+//     })
+//   }
 
-  if (state.latitude && state.longitude) {
-    properties.push({
-      name: 'location',
-      locationValue: {
-        latitude: parsing.toInt(state.latitude),
-        longitude: parsing.toInt(state.longitude)
-      },
-      dataType: payloads.createRecord.enum.LOCATION
-    })
-  }
+//   if (state.latitude && state.longitude) {
+//     properties.push({
+//       name: 'location',
+//       locationValue: {
+//         latitude: parsing.toInt(state.latitude),
+//         longitude: parsing.toInt(state.longitude)
+//       },
+//       dataType: payloads.createRecord.enum.LOCATION
+//     })
+//   }
 
-  const recordPayload = payloads.createRecord({
-    recordId: state.serialNumber,
-    recordType: 'asset',
-    properties
-  })
+//   const recordPayload = payloads.createRecord({
+//     recordId: state.serialNumber,
+//     recordType: 'asset',
+//     properties
+//   })
 
-  const reporterPayloads = state.reporters
-    .filter((reporter) => !!reporter.reporterKey)
-    .map((reporter) => payloads.createProposal({
-      recordId: state.serialNumber,
-      receivingAgent: reporter.reporterKey,
-      role: payloads.createProposal.enum.REPORTER,
-      properties: reporter.properties
-    }))
+//   const reporterPayloads = state.reporters
+//     .filter((reporter) => !!reporter.reporterKey)
+//     .map((reporter) => payloads.createProposal({
+//       recordId: state.serialNumber,
+//       receivingAgent: reporter.reporterKey,
+//       role: payloads.createProposal.enum.REPORTER,
+//       properties: reporter.properties
+//     }))
 
-  transactions.submit([recordPayload].concat(reporterPayloads), true)
-    .then(() => m.route.set(`/assets/${state.serialNumber}`))
-}
+//   transactions.submit([recordPayload].concat(reporterPayloads), true)
+//     .then(() => m.route.set(`/assets/${state.serialNumber}`))
+// }
 
 module.exports = AddAssetForm
