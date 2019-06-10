@@ -14,7 +14,13 @@
 
 const m = require('mithril')
 const { createHash } = require('crypto')
-const { Transaction, TransactionHeader, Batch, BatchHeader, BatchList } = require('sawtooth-sdk/protobuf')
+const { Transaction,
+        TransactionHeader,
+        Batch,
+        BatchHeader,
+        BatchList } = require('sawtooth-sdk/protobuf')
+
+const { SabrePayload, ExecuteContractAction } = require('../protobuf')
 
 const { SabrePayload, ExecuteContractAction } = require('../protobuf')
 
@@ -152,7 +158,9 @@ const _waitForCommit = (transactionIds, statusUrl) =>
             if (batch_result.status === 'COMMITTED') {
                 return Promise.resolve(transactionIds)
             } else if (batch_result.status === 'INVALID') {
-                let transaction_result = batch_result.invalid_transactions.find((txn) => transactionIds.includes(txn.id))
+                let transaction_result = batch_result
+                    .invalid_transactions
+                    .find((txn) => transactionIds.includes(txn.id))
                 if (transaction_result) {
                     return Promise.reject(transaction_result.message)
                 } else {
