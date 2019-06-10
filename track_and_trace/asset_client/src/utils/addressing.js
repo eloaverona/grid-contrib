@@ -50,6 +50,9 @@ module.exports = {
         let prefix = namespace.substring(0, 6)
         return SABRE_NAMESPACE_REGISTRY_PREFIX + hash(prefix, 64)
     },
+    getTntFamilyNamespacePrefix() {
+        return TNT_NAMESPACE
+    },
     makeAgentAddress(agentPublicKey) {
         return PIKE_NAMESPACE + PIKE_AGENT_SUBSPACE + hash(agentPublicKey, 62)
     },
