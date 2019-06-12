@@ -18,6 +18,12 @@ const GRID_FAMILY_VERSION = '1.0'
 const GRID_NAMESPACE = '621dee'
 const GRID_SCHEMA_SUBSPACE = '01'
 
+const SABRE_FAMILY_NAME = "sabre"
+const SABRE_FAMILY_VERSION = '0.3'
+const SABRE_NAMESPACE_REGISTRY_PREFIX  = "00ec00"
+const SABRE_CONTRACT_REGISTRY_PREFIX = "00ec01"
+const SABRE_CONTRACT_PREFIX = "00ec02"
+
 function hash(object, num) {
     let sha = crypto.createHash("sha512")
     return sha.update(object).digest("hex").substring(0, num)
@@ -28,19 +34,22 @@ function encodePage(page) {
 }
 
 module.exports = {
-<<<<<<< HEAD
-=======
     computeContractRegistryAddresses(families) {
         return families.map((family) => SABRE_CONTRACT_REGISTRY_PREFIX + hash(family.name, 64))
     },
     computeContractAddresses(families) {
         return families.map((family) => SABRE_CONTRACT_PREFIX + hash(family.name + "," + family.version, 64))
     },
+    computeContractRegistryAddress(name) {
+        return SABRE_CONTRACT_REGISTRY_PREFIX + hash(name, 64)
+    },
+    computeContractAddress(name, version) {
+        return SABRE_CONTRACT_PREFIX + hash(name + "," + version, 64)
+    },
     computeNamespaceRegistryAddress(namespace) {
         let prefix = namespace.substring(0, 6)
         return SABRE_NAMESPACE_REGISTRY_PREFIX + hash(prefix, 64)
     },
->>>>>>> 869a88a1... fixup addressing
     makeAgentAddress(agentPublicKey) {
         return PIKE_NAMESPACE + PIKE_AGENT_SUBSPACE + hash(agentPublicKey, 62)
     },
@@ -59,6 +68,9 @@ module.exports = {
     makePropertyPageAddresses(recordId, propertyNames, currentPage) {
         return propertyNames.map((name) => TNT_NAMESPACE + TNT_PROPERTY_SUBSPACE + hash(recordId, 36) + hash(name, 22) + encodePage(currentPage))
     },
+    makeProposalAddress(recordId, receivingAgent, timestamp)  {
+        return TNT_NAMESPACE + TNT_PROPOSAL_SUBSPACE + hash(recordId, 36) + hash(receivingAgent, 22) + hash(timestamp, 4)
+    },
     pikeFamily: {
         name: PIKE_FAMILY_NAME,
         version: PIKE_FAMILY_VERSION,
@@ -74,14 +86,11 @@ module.exports = {
         version: GRID_FAMILY_VERSION,
         namespace: GRID_NAMESPACE
     },
-<<<<<<< HEAD
-=======
     sabreFamily: {
         name: SABRE_FAMILY_NAME,
         version: SABRE_FAMILY_VERSION,
     },
     propertyAddressPrefix: TNT_NAMESPACE + TNT_PROPERTY_SUBSPACE,
->>>>>>> 869a88a1... fixup addressing
     agentAddressPrefix: PIKE_NAMESPACE + PIKE_AGENT_SUBSPACE,
     organizationAddressPrefix: PIKE_NAMESPACE + PIKE_ORG_SUBSPACE,
     schemaAddressPrefix: GRID_NAMESPACE + GRID_SCHEMA_SUBSPACE,
