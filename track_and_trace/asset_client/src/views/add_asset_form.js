@@ -18,8 +18,9 @@
 const m = require('mithril')
 
 const api = require('../services/api')
-// const payloads = require('../services/payloads')
-const transactions = require('../services/transactions')
+const {PropertyDefinition} = require('../protobuf')
+const auth = require('../services/auth')
+const records = require('../services/records')
 const parsing = require('../services/parsing')
 const forms = require('../components/forms')
 const layout = require('../components/layout')
@@ -29,9 +30,7 @@ const layout = require('../components/layout')
  */
 const authorizableProperties = [
   ['weight', 'Weight'],
-  ['location', 'Location'],
-  ['temperature', 'Temperature'],
-  ['shock', 'Shock']
+  ['location', 'Location']
 ]
 
 /**
@@ -46,10 +45,15 @@ const AddAssetForm = {
         properties: []
       }
     ]
-    api.get('agents')
-      .then(agents => {
-        const publicKey = api.getPublicKey()
-        vnode.state.agents = agents.filter(agent => agent.key !== publicKey)
+    m.request({
+      method: 'GET',
+      url: '/grid/agent'
+    })
+      .then(result => {
+        auth.getUserData()
+        .then(user => {
+          vnode.state.agents = result.filter(agent => agent.public_key !== user.publicKey)
+        })
       })
   },
 
@@ -60,15 +64,14 @@ const AddAssetForm = {
         m('form', {
           onsubmit: (e) => {
             e.preventDefault()
-            _handleSubmit(vnode.attrs.signingKey, vnode.state)
+            _handleSubmit(vnode.state)
           }
         },
         m('legend', 'Track New Asset'),
         forms.textInput(setter('serialNumber'), 'Serial Number'),
 
         layout.row([
-          forms.textInput(setter('type'), 'Type'),
-          forms.textInput(setter('subtype'), 'Subtype', false)
+          forms.textInput(setter('type'), 'Type')
         ]),
 
         forms.group('Weight (kg)', forms.field(setter('weight'), {
@@ -106,11 +109,12 @@ const AddAssetForm = {
                   oninput: m.withAttr('value', (value) => {
                     // clear any previously matched values
                     vnode.state.reporters[i].reporterKey = null
+
                     const reporter = vnode.state.agents.find(agent => {
-                      return agent.name === value || agent.key === value
+                      return agent.public_key === value
                     })
                     if (reporter) {
-                      vnode.state.reporters[i].reporterKey = reporter.key
+                      vnode.state.reporters[i].reporterKey = reporter.public_key
                     }
                   }),
                   onblur: () => _updateReporters(vnode, i)
@@ -158,57 +162,51 @@ const _updateReporters = (vnode, reporterIndex) => {
  *
  * Extract the appropriate values to pass to the create record transaction.
  */
-// const _handleSubmit = (signingKey, state) => {
-//   const properties = [{
-//     name: 'type',
-//     stringValue: state.type,
-//     dataType: payloads.createRecord.enum.STRING
-//   }]
+const _handleSubmit = (state) => {
+  const properties = [{
+    name: 'serialNumber',
+    dataType: PropertyDefinition.DataType.STRING,
+    stringValue: state.serialNumber
+  },
+  {
+    name: 'type',
+    stringValue: state.type,
+    dataType: PropertyDefinition.DataType.STRING
+  },
+  {
+    name: 'weight',
+    numberValue: (state.weight ? parsing.toInt(state.weight) : 0),
+    dataType: PropertyDefinition.DataType.NUMBER
+  },
+  {
+    name: 'location',
+    latLongValue: {
+      latitude: (state.latitude ? parsing.toInt(state.latitude) : 0),
+      longitude: (state.longitude ? parsing.toInt(state.longitude) : 0)
+    },
+    dataType: PropertyDefinition.DataType.LAT_LONG
+  }]
 
-//   if (state.subtype) {
-//     properties.push({
-//       name: 'subtype',
-//       stringValue: state.subtype,
-//       dataType: payloads.createRecord.enum.STRING
-//     })
-//   }
+  auth.getSigner()
+    .then((signer) => records.createRecord(properties, signer))
 
-//   if (state.weight) {
-//     properties.push({
-//       name: 'weight',
-//       numberValue: parsing.toInt(state.weight),
-//       dataType: payloads.createRecord.enum.NUMBER
-//     })
-//   }
+  // const recordPayload = payloads.createRecord({
+  //   recordId: state.serialNumber,
+  //   recordType: 'asset',
+  //   properties
+  // })
 
-//   if (state.latitude && state.longitude) {
-//     properties.push({
-//       name: 'location',
-//       locationValue: {
-//         latitude: parsing.toInt(state.latitude),
-//         longitude: parsing.toInt(state.longitude)
-//       },
-//       dataType: payloads.createRecord.enum.LOCATION
-//     })
-//   }
+  // const reporterPayloads = state.reporters
+  //   .filter((reporter) => !!reporter.reporterKey)
+  //   .map((reporter) => payloads.createProposal({
+  //     recordId: state.serialNumber,
+  //     receivingAgent: reporter.reporterKey,
+  //     role: payloads.createProposal.enum.REPORTER,
+  //     properties: reporter.properties
+  //   }))
 
-//   const recordPayload = payloads.createRecord({
-//     recordId: state.serialNumber,
-//     recordType: 'asset',
-//     properties
-//   })
-
-//   const reporterPayloads = state.reporters
-//     .filter((reporter) => !!reporter.reporterKey)
-//     .map((reporter) => payloads.createProposal({
-//       recordId: state.serialNumber,
-//       receivingAgent: reporter.reporterKey,
-//       role: payloads.createProposal.enum.REPORTER,
-//       properties: reporter.properties
-//     }))
-
-//   transactions.submit([recordPayload].concat(reporterPayloads), true)
-//     .then(() => m.route.set(`/assets/${state.serialNumber}`))
-// }
+  // transactions.submit([recordPayload].concat(reporterPayloads), true)
+  //   .then(() => m.route.set(`/assets/${state.serialNumber}`))
+}
 
 module.exports = AddAssetForm

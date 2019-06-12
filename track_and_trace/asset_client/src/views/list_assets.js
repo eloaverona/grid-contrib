@@ -21,7 +21,7 @@ const truncate = require('lodash/truncate')
 const {Table, FilterGroup, PagingButtons} = require('../components/tables')
 const api = require('../services/api')
 const { formatTimestamp } = require('../services/parsing')
-const {getPropertyValue, getLatestPropertyUpdateTime, getOldestPropertyUpdateTime, countPropertyUpdates} = require('../utils/records')
+const {getPropertyValue, getLatestUpdateTime, getOldestPropertyUpdateTime, countPropertyUpdates} = require('../utils/records')
 
 const PAGE_SIZE = 50
 
@@ -33,14 +33,25 @@ const AssetList = {
     vnode.state.currentPage = 0
 
     const refresh = () => {
-      api.get('records?recordType=asset').then((records) => {
-        vnode.state.records = records
+      // api.get('records?recordType=asset').then((records) => {
+      //   vnode.state.records = records
+      //   vnode.state.records.sort((a, b) => {
+      //     return getLatestPropertyUpdateTime(b) - getLatestPropertyUpdateTime(a)
+      //   })
+      //   vnode.state.filteredRecords = vnode.state.records
+      // })
+      //   .then(() => { vnode.state.refreshId = setTimeout(refresh, 2000) })
+      m.request({
+        method: 'GET',
+        url: '/grid/record'
+      })
+      .then((result) => {
+        vnode.state.records = result
         vnode.state.records.sort((a, b) => {
-          return getLatestPropertyUpdateTime(b) - getLatestPropertyUpdateTime(a)
+          return getLatestUpdateTime(b) - getLatestUpdateTime(a)
         })
         vnode.state.filteredRecords = vnode.state.records
       })
-        .then(() => { vnode.state.refreshId = setTimeout(refresh, 2000) })
     }
 
     refresh()
@@ -67,14 +78,14 @@ const AssetList = {
             vnode.state.currentPage * PAGE_SIZE,
             (vnode.state.currentPage + 1) * PAGE_SIZE)
                 .map((rec) => [
-                  m(`a[href=/assets/${rec.recordId}]`, {
+                  m(`a[href=/assets/${rec.record_id}]`, {
                     oncreate: m.route.link
-                  }, truncate(rec.recordId, { length: 32 })),
+                  }, truncate(getPropertyValue(rec, 'serialNumber'), { length: 32 })),
                   getPropertyValue(rec, 'type'),
                   // This is the "created" time, synthesized from properties
                   // added on the initial create
                   formatTimestamp(getOldestPropertyUpdateTime(rec)),
-                  formatTimestamp(getLatestPropertyUpdateTime(rec)),
+                  formatTimestamp(getLatestUpdateTime(rec)),
                   countPropertyUpdates(rec)
                 ]),
           noRowsText: 'No records found'
