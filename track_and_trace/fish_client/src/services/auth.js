@@ -102,7 +102,7 @@ const AuthService = {
     }),
 
     getPrivateKey: () => new Promise((resolve, reject) => {
-        let key = sessionStorage.getItem('asset_track/privateKey')
+        let key = sessionStorage.getItem('fish_net/privateKey')
         if (!key) {
             reject('No private key available. Try logging in')
             return
