@@ -50,6 +50,8 @@ const setAuth = token => {
 
 const clearAuth = () => {
   authToken = null
+  console.log(authToken)
+  console.log(window.localStorage)
 }
 
 /**

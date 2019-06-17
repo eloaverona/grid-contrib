@@ -117,6 +117,8 @@ services:
       - '8022:80'
     depends_on:
       - server
+      - rest-api
+      - gridd
 
   rethink:
     image: rethinkdb
