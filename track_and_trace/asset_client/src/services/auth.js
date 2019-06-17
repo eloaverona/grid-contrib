@@ -89,7 +89,6 @@ const AuthService = {
 
     getUserData: () => new Promise((resolve, reject) => {
         let userStr = localStorage.getItem(`${AuthService.namespace}/${STORE_USER}`)
-        debugger;
         if (!userStr) {
             reject('No user data available. Please log in')
             return
